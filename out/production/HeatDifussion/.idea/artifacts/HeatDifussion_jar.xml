@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="HeatDifussion:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/HeatDifussion_jar</output-path>
+    <root id="archive" name="HeatDifussion.jar">
+      <element id="module-output" name="HeatDifussion" />
+      <element id="library" level="project" name="javafx-sdk-21.0" />
+    </root>
+  </artifact>
+</component>
