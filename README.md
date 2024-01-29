@@ -1,0 +1,1 @@
+![Heat Diffusion Project Cover](C:\Users\gorgr\IdeaProjects\HeatDifussion\images\DALL·E 2024-01-29 13.33.55 - A futuristic and artistic representation of heat diffusion, showcasing a gradient of warm colors like red, orange, and yellow blending into cooler col.png)
