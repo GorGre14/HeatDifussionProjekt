@@ -1,1 +1,1 @@
-![Description of Image](image.png)
+![Heat Diffusion Project Cover](image.png)
