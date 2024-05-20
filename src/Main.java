@@ -1,35 +1,34 @@
 import com.heatDifussion.myapp.Chart;
-import com.heatDifussion.myapp.ComputationWorker;
-
+import com.heatDifussion.myapp.ComputationHandler;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.concurrent.CyclicBarrier;
 
 public class Main {
 
-    private static JComboBox<String> comboBox;
-    private static JButton startBtn, stopBtn, resetBtn;
-    private static double[][] temperature = new double[100][100];
+    private JComboBox<String> comboBox;
+    private JButton startBtn, stopBtn, resetBtn;
+    private double[][] temperature = new double[100][100];
 
-    private static ComputationWorker computationThread;
+    private ComputationHandler computationHandler;
+    private String selectedMode;
 
     public static void main(String[] args) {
+        Main mainApp = new Main();
+        mainApp.createAndShowGUI();
+    }
 
-
+    private void createAndShowGUI() {
         JFrame frame = new JFrame();
         frame.setLayout(new BorderLayout());
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        //frame.setPreferredSize(HeatSimConstants.DEFAULT_WINDOW_DIMENSION);
         frame.setResizable(false);
-
 
         for (int i = 0; i < temperature.length; i++) {
             temperature[i][99] = 1;
         }
-
 
         Chart chart = new Chart(temperature);
         frame.add(chart, BorderLayout.CENTER);
@@ -46,9 +45,7 @@ public class Main {
         modeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         controls.add(modeLabel);
 
-
-        EventHandler eventHandler = new EventHandler();
-
+        EventHandler eventHandler = new EventHandler(this);
 
         class MyComboBoxRenderer extends BasicComboBoxRenderer {
             public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -75,32 +72,11 @@ public class Main {
         resetBtn.addActionListener(eventHandler);
         controls.add(resetBtn);
 
-
-
-
         frame.add(controls, BorderLayout.EAST);
 
         frame.pack();
         frame.setVisible(true);
 
-
-
-
-        //ComputationHandler computationHandler = new ComputationHandler(temperature);
-
-
-        computationThread = new ComputationWorker(
-                0,
-                temperature.length,
-                temperature[0].length, // assuming temperature[0].length is the correct width
-                temperature[0].length, // assuming temperature[0].length is the correct height
-                temperature
-        );
-
-
-
-
-        // thread responsible for rendering
         SwingWorker<Void, Void> chartWorker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
@@ -112,20 +88,53 @@ public class Main {
         chartWorker.execute();
     }
 
+    private class EventHandler implements ActionListener {
+        private Main mainApp;
 
-    private static class EventHandler implements ActionListener {
+        public EventHandler(Main mainApp) {
+            this.mainApp = mainApp;
+        }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource().equals(comboBox)) {
-                System.out.println(comboBox.getSelectedItem());
+                mainApp.selectedMode = (String) comboBox.getSelectedItem();
+                System.out.println(mainApp.selectedMode);
             } else if (e.getSource().equals(startBtn)) {
-                computationThread.start();
+                if (mainApp.selectedMode != null) {
+                    if (mainApp.selectedMode.equals("parallel")) {
+                        mainApp.computationHandler = new ComputationHandler(mainApp.temperature, Runtime.getRuntime().availableProcessors());
+                    } else if (mainApp.selectedMode.equals("sequential")) {
+                        mainApp.computationHandler = new ComputationHandler(mainApp.temperature);
+                    } else if (mainApp.selectedMode.equals("distributed")) {
+                        // Add distributed logic if necessary
+                    }
+                } else {
+                    System.out.println("Please select a mode before starting the computation.");
+                }
             } else if (e.getSource().equals(stopBtn)) {
-                System.out.println("stop");
+                if (mainApp.computationHandler != null) {
+                    mainApp.computationHandler.shutdown();
+                    System.out.println("Computation stopped.");
+                } else {
+                    System.out.println("ComputationHandler is not initialized.");
+                }
             } else if (e.getSource().equals(resetBtn)) {
-                System.out.println("reset");
+                if (mainApp.computationHandler != null) {
+                    mainApp.computationHandler.shutdown();
+                }
+                mainApp.resetTemperature();
+                System.out.println("Temperature grid reset.");
             }
+        }
+    }
+
+    private void resetTemperature() {
+        for (int i = 0; i < temperature.length; i++) {
+            for (int j = 0; j < temperature[i].length; j++) {
+                temperature[i][j] = 0;
+            }
+            temperature[i][99] = 1;
         }
     }
 }

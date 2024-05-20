@@ -4,16 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class Chart extends JComponent {
-
+public class Chart extends JPanel {
+    private final double[][] temperature;
     private int WIDTH;
     private int HEIGHT;
     private int nTiles;
     private int tileSize;
     private BufferedImage tempScale;
     private BufferedImage bufferedImage;
-    private final double[][] temperature;
-
 
     public Chart(double[][] temperature) {
         this.temperature = temperature;
@@ -24,12 +22,10 @@ public class Chart extends JComponent {
         this.setPreferredSize(new Dimension(WIDTH + 160, HEIGHT + 50)); // Set the preferred size of the component
         this.setSize(new Dimension(WIDTH, HEIGHT));
 
-
         this.tempScale = new BufferedImage(50, HEIGHT, BufferedImage.TYPE_INT_RGB);
         fillTempBuffer();
         this.bufferedImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     }
-
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -41,8 +37,7 @@ public class Chart extends JComponent {
         g2d.drawImage(bufferedImage, 40, 15, null);
 
         fillTempBuffer();
-        g2d.drawImage(tempScale, 40+WIDTH+20, 15, null);
-
+        g2d.drawImage(tempScale, 40 + WIDTH + 20, 15, null);
 
         drawMesh(40, 15, g2d);
     }
@@ -50,21 +45,20 @@ public class Chart extends JComponent {
     private void drawMesh(int startX, int startY, Graphics2D g2d) {
         g2d.setColor(Color.BLACK);
         FontMetrics fm = g2d.getFontMetrics();
-        int padding = 20;  // space between x-axis and labels
-        int space = 20;  // space between the mesh and the rectangle
+        int padding = 20; // space between x-axis and labels
+        int space = 20; // space between the mesh and the rectangle
         int rectWidth = 50; // width of the rectangle
         int labelSpacing = 50; // vertical spacing between labels on the right
-
 
         // Draw vertical lines and labels along the x-axis for every 5th tile
         for (int i = 0; i <= nTiles; i++) {
             int x = startX + i * tileSize;
             g2d.drawLine(x, startY, x, startY + HEIGHT);
 
-            if (i % 5 == 0 && i != 0) {  // Skip label '0'
+            if (i % 5 == 0 && i != 0) { // Skip label '0'
                 String label = Integer.toString(i);
                 int labelWidth = fm.stringWidth(label);
-                g2d.drawString(label, x - labelWidth / 2 - 7, startY + HEIGHT + padding - 3);  // Position labels below x-axis
+                g2d.drawString(label, x - labelWidth / 2 - 7, startY + HEIGHT + padding - 3); // Position labels below x-axis
             }
         }
 
@@ -73,10 +67,10 @@ public class Chart extends JComponent {
             int y = startY + i * tileSize;
             g2d.drawLine(startX, y, startX + WIDTH, y);
 
-            if (i % 5 == 0 && nTiles - i != 0) {  // Skip label '0'
+            if (i % 5 == 0 && nTiles - i != 0) { // Skip label '0'
                 String label = Integer.toString(nTiles - i);
                 int labelWidth = fm.stringWidth(label);
-                g2d.drawString(label, startX - labelWidth - 5, y + 7);  // Adjust x position by width of string
+                g2d.drawString(label, startX - labelWidth - 5, y + 7); // Adjust x position by width of string
             }
         }
 
@@ -88,16 +82,14 @@ public class Chart extends JComponent {
         for (int i = 0; i * labelSpacing <= HEIGHT; i++) {
             String label = Integer.toString(i * 100); // Now increments by 100
             int y = HEIGHT - i * labelSpacing; // adjust y for bottom-up labels
-            g2d.drawString(label, rectStartX + 5, y+20);
+            g2d.drawString(label, rectStartX + 5, y + 20);
         }
     }
-
-
 
     private void fillTempBuffer() {
         Graphics2D g2d = (Graphics2D) tempScale.getGraphics();
         for (int i = 0; i < HEIGHT; i += tileSize) {
-            float hue = 0.66f * ((float)i / HEIGHT); // Interpolating from 0 (red/hot) to 0.66 (blue/cold)
+            float hue = 0.66f * ((float) i / HEIGHT); // Interpolating from 0 (red/hot) to 0.66 (blue/cold)
             int rgb = Color.HSBtoRGB(hue, 1.0f, 1.0f);
 
             g2d.setColor(new Color(rgb));
@@ -120,5 +112,4 @@ public class Chart extends JComponent {
             }
         }
     }
-
 }
